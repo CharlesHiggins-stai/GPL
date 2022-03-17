@@ -5,16 +5,17 @@ import copy
 
 class MCTS_agent:
     def __init__(self):
-        print('agent initialised')
+        # print('agent initialised')
         action_set = ['2', '4', '8']
         simulator = TestSimulator(action_set)
         self.search_engine = MCTS(simulator, action_set)
 
     def step(self, current_value, current_reward):
-        if current_reward > 5:
-            print('winning at life bitches')
+        # if current_reward > 5:
+        #     print('winning at life bitches')
         # TODO when moving to proper parrticle filter, will need to update particle selection
         # print(f"this is the current value {current_value}")
+        self.search_engine.particle = Particle(current_value, current_reward)
         action = self.search_engine.build_tree()
         return action
         
@@ -23,7 +24,7 @@ class MCTS_agent:
         
 
 class MCTS:
-    def __init__(self, simulator, action_set, max_iterations = 50):
+    def __init__(self, simulator, action_set, max_iterations = 25):
         # action_set must be an interable of some sort, with unique values
         self.sim = simulator
         self.max_iterations = max_iterations
@@ -36,8 +37,9 @@ class MCTS:
     def build_tree(self):
         # TODO impliment particle
         root = Node(None, None)
+        p = self.particle
         for i in range(self.max_iterations):
-            p = self.sim.distill_env_to_particle()
+            # p = self.sim.distill_env_to_particle()
             self.search(p, root)
         best_child = sorted(root.children, key = lambda x: x.value/x.visits, reverse = True)[0]
         kids = sorted(root.children, key = lambda x: x.value/x.visits, reverse = True)
@@ -93,7 +95,7 @@ class MCTS:
         return n_node
 
     
-    def rollout(self, expanded, max_rollout_depth = 5):
+    def rollout(self, expanded, max_rollout_depth = 3):
         if self.sim.is_terminal() == True:
             expanded.value += self.sim.current_val()
             return expanded
@@ -122,7 +124,7 @@ class MCTS:
             node = node.parent
 
         
-    def ucb1(self, node, expl = 0.5):
+    def ucb1(self, node, expl = 2):
         #upper confidence trees --- first parameter ucb is an average return of child, second term is (weighted) value exploring the relative exploration of parent to child
         best = None
         best_value = None
@@ -158,21 +160,28 @@ class Node:
 
 
 if __name__ == "__main__":
-    game = TestEnv()
-    ga = MCTS_agent()
-    current_value = 0
-    new_reward = 0
-    goal = 8
-    action_history = []
-    while game.terminal == False:
-        action = ga.step(current_value, new_reward)
-        new_reward, current_value = game.step(action)
-        action_history.append(action)
+    total = 500
+    sub_optimal = 0
+    for x in range(total):
+        game = TestEnv()
+        ga = MCTS_agent()
+        current_value = 0
+        new_reward = 0
+        action_history = []
+        while game.terminal == False:
+            action = ga.step(current_value, new_reward)
+            new_reward, current_value = game.step(action)
+            action_history.append(action)
+        assert(game.agent_reward >= 0)
+        if len(action_history)>3:
+            sub_optimal+= 1
 
-    print('over')
-    print(f'total rewards = {game.agent_reward}')
-    print(f"total reached = {game.current_value}")        
-    print(f'action_history: {action_history}')
+    print(f"played suboptimally {100*sub_optimal/total}% of the time")
+
+    # print('over')
+    # print(f'total rewards = {game.agent_reward}')
+    # print(f"total reached = {game.current_value}")        
+    # print(f'action_history: {action_history}')
         
     
 

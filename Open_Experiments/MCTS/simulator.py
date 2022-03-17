@@ -9,7 +9,7 @@ class Particle:
 
 class TestSimulator():
     def __init__(self, action_space):
-        self.env = TestEnv(total = 8, action_space = ['2','4','8'])
+        self.env = TestEnv(total = 12, action_space = action_space)
 
     
     def config_env(self, particle):
@@ -53,7 +53,7 @@ class TestEnv:
     #  actions cost 0.01...
     #  if you get 100, it's terminal, plus 100. If you get above 100, you get minus the number over... 
 
-    def __init__(self, total = 8, action_space = ['2', '4', '8']): 
+    def __init__(self, total = 12, action_space = ['2', '4', '8']): 
         self.current_value = 0
         self.total_value = total
         self.agent_reward = 0
@@ -72,8 +72,7 @@ class TestEnv:
         #  process actions
 
         if self.current_value == self.total_value:
-            self.agent_reward += 100
-            print('gave a big ass reward')
+            self.agent_reward += 5
             self.terminal = True
         if self.current_value > self.total_value:
             self.agent_reward -= self.current_value - self.total_value
@@ -83,25 +82,25 @@ class TestEnv:
         return self.agent_reward, self.current_value
 
 
-class GreedyAgent:
-    def __init__(self):
-        current_value = 0
-        goal = 100
+# class GreedyAgent:
+#     def __init__(self):
+#         current_value = 0
+#         goal = 16
     
-    def step(self, current_value, goal):
-        if current_value <= (goal - 8):
-            return '8'
-        else:
-            return '4'
+#     def step(self, current_value, goal):
+#         if current_value <= (goal - 8):
+#             return '8'
+#         else:
+#             return '4'
 
-if __name__ == "__main__":
-    game = TestEnv()
-    ga = GreedyAgent()
-    current_value = 0
-    goal = 10
-    while game.terminal == False:
-        action = ga.step(current_value, goal)
-        new_reward, current_value = game.step(action)
-        print(action, game.agent_reward)
-    print('over')        
+# if __name__ == "__main__":
+#     game = TestEnv()
+#     ga = GreedyAgent()
+#     current_value = 0
+#     goal = 8
+#     while game.terminal == False:
+#         action = ga.step(current_value, goal)
+#         new_reward, current_value = game.step(action)
+#         print(action, game.agent_reward)
+#     print('over')        
         
